@@ -83,10 +83,37 @@ end
 Then("author should be stored") do
   $authors.each_with_index do |row, index|
     response = HTTParty.get(
-        "https://qjimvba862.execute-api.us-east-2.amazonaws.com/dev/author/#{$create_response[index]["authorId"]}",
-        :headers => { 'Content-Type' => 'application/json' }
+      "https://qjimvba862.execute-api.us-east-2.amazonaws.com/dev/author/#{$create_response[index]["authorId"]}",
+      :headers => { 'Content-Type' => 'application/json' }
     )
     single_response = JSON.parse(response.body)
     expect(single_response["Item"]["authorName"]).to eq($create_response[index]["authorName"])
+  end
+end
+
+When("deleting an author") do
+  $authors.each do |row|
+    puts "https://qjimvba862.execute-api.us-east-2.amazonaws.com/dev/author/#{row["authorId"]}"
+    response = HTTParty.delete(
+      "https://qjimvba862.execute-api.us-east-2.amazonaws.com/dev/author/#{row["authorId"]}",
+      :headers => {
+        "Content-Type" => "application/json"
+      }
+    )
+
+    puts JSON.parse(response.body)
+  end
+end
+
+Then("should not be retrieved") do
+  $authors.each do |row|
+    response = HTTParty.get(
+        "https://qjimvba862.execute-api.us-east-2.amazonaws.com/dev/author",
+        :headers => { 'Content-Type' => 'application/json' }
+    )
+    @read_response = JSON.parse(response.body)
+    @read_response["Items"].each do |item|
+      expect(row["authorId"]).to_not eq(item["authorId"])
+    end
   end
 end

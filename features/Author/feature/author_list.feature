@@ -17,3 +17,7 @@ Feature: CRU authors
   Scenario: Update an author
     When updating author attributes
     Then should retrieve updated author attributes
+
+#  Scenario: Delete an author
+#    When deleting an author
+#    Then should not be retrieved
