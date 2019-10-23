@@ -14,12 +14,12 @@ Then("at least one author should be received") do
 end
 
 Given(/^a list of authors:$/) do |author|
-  @authors = author.hashes
+  $authors = author.hashes
 end
 
 When("creating authors") do
-  @create_response = []
-  @authors.each do |row|
+  $create_response = []
+  $authors.each do |row|
     payload = {
       :authorName => "#{row[:authorName]}",
       :email => "#{row[:email]}",
@@ -33,23 +33,23 @@ When("creating authors") do
       :body => payload.to_json
     )
 
-    @create_response.push(JSON.parse(response.body))
+    $create_response.push(JSON.parse(response.body))
   end
 end
 
 Then("the author has to be in the list") do
-  @authors.each_with_index do |row, index|
-    expect(@create_response[index]["authorId"]).to be
-    expect(@create_response[index]["authorName"]).to eq(row[:authorName])
-    expect(@create_response[index]["email"]).to eq(row[:email])
-    expect(@create_response[index]["birthDate"]).to eq(row[:birthDate])
-    expect(@create_response[index]["createdAt"]).to be
+  $authors.each_with_index do |row, index|
+    expect($create_response[index]["authorId"]).to be
+    expect($create_response[index]["authorName"]).to eq(row[:authorName])
+    expect($create_response[index]["email"]).to eq(row[:email])
+    expect($create_response[index]["birthDate"]).to eq(row[:birthDate])
+    expect($create_response[index]["createdAt"]).to be
   end
 end
 
 When("updating author attributes") do
   @update_response = []
-  @create_response.each_with_index do |row, index|
+  $create_response.each_with_index do |row, index|
     payload = {
       :Item => {
         :authorName => "#{index}-customAuthorName",
@@ -71,11 +71,22 @@ When("updating author attributes") do
 end
 
 Then("should retrieve updated author attributes") do
-  @authors.each_with_index do |row, index|
+  $authors.each_with_index do |row, index|
     expect(@update_response[index]["authorId"]).to eq(row[:authorId])
     expect(@update_response[index]["authorName"]).to eq("#{index}-customAuthorName")
     expect(@update_response[index]["email"]).to eq("#{index}-customEmail")
     expect(@update_response[index]["birthDate"]).to eq("#{index}-customBirthDate")
     expect(@update_response[index]["createdAt"]).to eq(row[:createdAt])
+  end
+end
+
+Then("author should be stored") do
+  $authors.each_with_index do |row, index|
+    response = HTTParty.get(
+        "https://qjimvba862.execute-api.us-east-2.amazonaws.com/dev/author/#{$create_response[index]["authorId"]}",
+        :headers => { 'Content-Type' => 'application/json' }
+    )
+    single_response = JSON.parse(response.body)
+    expect(single_response["Item"]["authorName"]).to eq($create_response[index]["authorName"])
   end
 end
