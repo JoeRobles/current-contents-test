@@ -1,4 +1,4 @@
-Feature: Get all authors
+Feature: CRU authors
 
   Scenario: Test author list endpoint
     When fetching all author list

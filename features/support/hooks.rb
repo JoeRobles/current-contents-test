@@ -1,7 +1,7 @@
 require 'watir'
 
 Before do
-  @browser = Watir::Browser.new( :chrome, {:chromeOptions => {:args => ['--headless', '--window-size=1200x600']}})
+  @browser = Watir::Browser.new( :chrome, {:chromeOptions => {:args => %w[--headless, no-sandbox, no-gui']}})
 
 end
 
